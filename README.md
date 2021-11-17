@@ -59,7 +59,7 @@ If you discover any security related issues, please email hello@shapeandshift.de
 
 ### Requirements
 - ext-curl
-- PHP 7.4
+- PHP 7.4 / 8.0
 - vin-sw/shopware-php-sdk >= 1.0
 
 This SDK is mainly dedicated to Shopware 6.4 and onwards, earlier SW application may still be usable without test
