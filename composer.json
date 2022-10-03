@@ -4,10 +4,10 @@
     "type": "library",
     "version": "1.0.0",
     "require": {
-        "vin-sw/shopware-sdk": "^1.0",
         "php": "^7.4 || ^8.0",
         "ext-json": "*",
-        "symfony/psr-http-message-bridge": "*"
+        "symfony/psr-http-message-bridge": "*",
+        "vin-sw/shopware-sdk": "1.5.1"
     },
     "license": "MIT",
     "autoload": {
