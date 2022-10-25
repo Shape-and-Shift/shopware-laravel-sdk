@@ -2,12 +2,12 @@
     "name": "sas/shopware-laravel-sdk",
     "description": "Shopware SDK for Laravel 8",
     "type": "library",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "require": {
         "php": "^7.4 || ^8.0",
         "ext-json": "*",
         "symfony/psr-http-message-bridge": "*",
-        "vin-sw/shopware-sdk": "1.5.1"
+        "vin-sw/shopware-sdk": "1.*"
     },
     "license": "MIT",
     "autoload": {
