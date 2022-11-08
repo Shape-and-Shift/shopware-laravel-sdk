@@ -34,7 +34,7 @@ class SwAppMiddleware
 
         if ($request->getMethod() === 'POST' && $this->supportsPostRequest($request)) {
             $requestContent = json_decode($request->getContent(), true);
-            $shopId = $requestContent['source']['shopId'];
+            $shopId = $requestContent['source'][ShopRequest::SHOP_ID_REQUEST_PARAMETER];
 
             $shop = $this->shopRepository->getShopById($shopId);
 

@@ -1,3 +1,6 @@
+### 1.2.1
+- Fix wrong shopId parameter
+
 ### 1.2.0
 - Update SwAppMiddleware check post request key parameter same as get queries
 
