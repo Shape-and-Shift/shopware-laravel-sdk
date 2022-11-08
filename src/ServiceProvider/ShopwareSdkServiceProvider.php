@@ -2,6 +2,7 @@
 
 namespace Sas\ShopwareLaravelSdk\ServiceProvider;
 
+use Sas\ShopwareLaravelSdk\Http\Middleware\SwAppIframeMiddleware;
 use Sas\ShopwareLaravelSdk\Http\Middleware\SwAppMiddleware;
 use Illuminate\Support\ServiceProvider;
 use Sas\ShopwareLaravelSdk\Utils\AppHelper;
@@ -40,5 +41,6 @@ class ShopwareSdkServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/app.php');
 
         $this->app->get('router')->aliasMiddleware('sas.app.auth', SwAppMiddleware::class);
+        $this->app->get('router')->aliasMiddleware('sas.app.auth.iframe', SwAppIframeMiddleware::class);
     }
 }
