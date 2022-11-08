@@ -73,21 +73,15 @@ class SwAppMiddleware
             return false;
         }
 
-        $requiredKeys = ['url', 'shopId'];
-
-        foreach ($requiredKeys as $key) {
-            if (!array_key_exists($key, $requestContent['source'])) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->checkRequiredKeys($requestContent['source']);
     }
 
     private function supportsGetRequest(Request $request): bool
     {
-        $query = $request->query->all();
+        return $this->checkRequiredKeys($request->query->all());
+    }
 
+    private function checkRequiredKeys(array $data): bool {
         $requiredKeys = [
             ShopRequest::SHOP_ID_REQUEST_PARAMETER,
             ShopRequest::SHOP_URL_REQUEST_PARAMETER,
@@ -97,7 +91,7 @@ class SwAppMiddleware
         ];
 
         foreach ($requiredKeys as $key) {
-            if (!array_key_exists($key, $query)) {
+            if (!array_key_exists($key, $data)) {
                 return false;
             }
         }
