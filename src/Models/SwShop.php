@@ -6,6 +6,13 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Authenticatable;
 
+/**
+ * @property string $shop_id
+ * @property string $shop_url
+ * @property string $shop_secret
+ * @property string $api_key
+ * @property string $secret_key
+ */
 class SwShop extends Model implements AuthenticatableContract
 {
     use Authenticatable;

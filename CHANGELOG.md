@@ -1,3 +1,6 @@
+### 1.3.0
+- Add SwAppIframeMiddleware to verify incoming requests from Iframe Shopware
+
 ### 1.2.1
 - Fix wrong shopId parameter
 
