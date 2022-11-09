@@ -34,11 +34,15 @@ class ContextServiceProvider extends ServiceProvider implements DeferrableProvid
             /** @var Request $request */
             $request = $app->get(Request::class);
 
-            if ($request->getMethod() === 'POST') {
-                $requestContent = \json_decode($request->getContent(), true);
-                $shopId = $requestContent['source'][ShopRequest::SHOP_ID_REQUEST_PARAMETER];
+            if ($request->headers->has(ShopRequest::SHOP_ID_REQUEST_PARAMETER)) {
+                $shopId = $request->headers->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
             } else {
-                $shopId = $request->query->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
+                if ($request->getMethod() === 'POST') {
+                    $requestContent = \json_decode($request->getContent(), true);
+                    $shopId = $requestContent['source'][ShopRequest::SHOP_ID_REQUEST_PARAMETER];
+                } else {
+                    $shopId = $request->query->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
+                }
             }
 
             if (!$shopId) {
