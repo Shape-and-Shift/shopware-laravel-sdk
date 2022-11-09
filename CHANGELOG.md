@@ -1,3 +1,6 @@
+### 1.3.1
+- Add SwAppHeaderMiddleware to verify incoming headers requests from Shopware
+
 ### 1.3.0
 - Add SwAppIframeMiddleware to verify incoming requests from Iframe Shopware
 
