@@ -39,7 +39,7 @@ class ContextServiceProvider extends ServiceProvider implements DeferrableProvid
             } else {
                 if ($request->getMethod() === 'POST') {
                     $requestContent = \json_decode($request->getContent(), true);
-                    $shopId = $requestContent['source'][ShopRequest::SHOP_ID_REQUEST_PARAMETER];
+                    $shopId = $requestContent['source']['shopId'];
                 } else {
                     $shopId = $request->query->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
                 }
