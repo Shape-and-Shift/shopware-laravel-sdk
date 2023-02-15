@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Sas\ShopwareLaravelSdk\Models\SwShop;
 use Sas\ShopwareLaravelSdk\Repositories\ShopRepository;
-use Vin\ShopwareSdk\Data\Webhook\Shop;
 use Vin\ShopwareSdk\Data\Webhook\ShopRequest;
 use Vin\ShopwareSdk\Exception\AuthorizationFailedException;
 use Vin\ShopwareSdk\Service\WebhookAuthenticator;
@@ -36,6 +35,7 @@ class SwAppMiddleware
      * @param Closure $next
      * @param string|null ...$guards
      * @return mixed
+     * @throws AuthorizationFailedException
      */
     public function handle(Request $request, Closure $next, ...$guards)
     {
@@ -57,6 +57,19 @@ class SwAppMiddleware
         return $next($request);
     }
 
+    protected function supportsPostRequest(Request $request): bool
+    {
+        $requestContent = json_decode((string)$request->getContent(), true);
+
+        $hasSource = $requestContent && array_key_exists('source', $requestContent);
+
+        if (!$hasSource) {
+            return false;
+        }
+
+        return $this->checkRequiredKeys($requestContent['source']);
+    }
+
     protected function checkRequiredKeys(array $data): bool
     {
         foreach (self::REQUIRED_KEYS as $key) {
@@ -68,27 +81,9 @@ class SwAppMiddleware
         return true;
     }
 
-    protected function supportsPostRequest(Request $request): bool
-    {
-        $requestContent = json_decode($request->getContent(), true);
-
-        $hasSource = $requestContent && array_key_exists('source', $requestContent);
-
-        if (!$hasSource) {
-            return false;
-        }
-
-        return $this->checkRequiredKeys($requestContent['source']);
-    }
-
-    protected function supportsGetRequest(Request $request): bool
-    {
-        return $this->checkRequiredKeys($request->query->all());
-    }
-
     protected function authenticatePostRequest(Request $request): SwShop
     {
-        $requestContent = json_decode($request->getContent(), true);
+        $requestContent = json_decode((string)$request->getContent(), true);
         $sourceRequest = $requestContent['source'];
         $shopId = $sourceRequest[ShopRequest::SHOP_ID_REQUEST_PARAMETER];
 
@@ -103,9 +98,14 @@ class SwAppMiddleware
         return $shop;
     }
 
+    protected function supportsGetRequest(Request $request): bool
+    {
+        return $this->checkRequiredKeys($request->query->all());
+    }
+
     protected function authenticateGetRequest(Request $request): SwShop
     {
-        $shopId = $request->query->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
+        $shopId = (string)$request->query->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
         $shop = $this->shopRepository->getShopById($shopId);
 
         $authenticated = $shop && WebhookAuthenticator::authenticateGetRequest($shop->shop_secret);
@@ -119,7 +119,7 @@ class SwAppMiddleware
 
     protected function authenticateDeleteRequest(Request $request): SwShop
     {
-        $shopId = $request->query->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
+        $shopId = (string)$request->query->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
         $shop = $this->shopRepository->getShopById($shopId);
 
         $authenticated = $shop && WebhookAuthenticator::authenticateGetRequest($shop->shop_secret);
