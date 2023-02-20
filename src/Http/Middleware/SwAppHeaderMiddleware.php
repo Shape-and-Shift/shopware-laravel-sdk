@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Sas\ShopwareLaravelSdk\Models\SwShop;
 use Sas\ShopwareLaravelSdk\Repositories\ShopRepository;
+use Sas\ShopwareLaravelSdk\Utils\AppHelper;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Vin\ShopwareSdk\Data\Webhook\ShopRequest;
 use Vin\ShopwareSdk\Exception\AuthorizationFailedException;
@@ -27,11 +28,10 @@ class SwAppHeaderMiddleware
      *
      * @param Request $request
      * @param Closure $next
-     * @param string|null ...$guards
      * @return mixed
      * @throws AuthorizationFailedException
      */
-    public function handle(Request $request, Closure $next, ...$guards)
+    public function handle(Request $request, Closure $next)
     {
         $shop = $this->authenticateHeaderRequest($request);
 
@@ -44,8 +44,12 @@ class SwAppHeaderMiddleware
     {
         $headers = $request->headers;
         $shopId = $headers->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
+        $appId = $headers->get(AppHelper::APP_ID_REQUEST_PARAMETER);
+        if ($headers->has(AppHelper::APP_ID_REQUEST_PARAMETER) && empty($appId)) {
+            throw new AuthorizationFailedException(sprintf('%s in headers is invalid', AppHelper::APP_ID_REQUEST_PARAMETER));
+        }
 
-        $shop = $this->shopRepository->getShopById($shopId);
+        $shop = $this->shopRepository->getShopById($shopId, ['app_id' => $appId]);
 
         $authenticated = $shop && $this->checkHeaderRequests($headers, $shop);
 
@@ -60,12 +64,12 @@ class SwAppHeaderMiddleware
     {
         $queries = [];
 
-        if ($headers->has('location-id')) {
-            $queries['location-id'] = $headers->get('location-id');
+        if ($headers->has(AppHelper::LOCATION_ID_REQUEST_PARAMETER)) {
+            $queries[AppHelper::LOCATION_ID_REQUEST_PARAMETER] = $headers->get(AppHelper::LOCATION_ID_REQUEST_PARAMETER);
         }
 
-        if ($headers->has('privileges')) {
-            $queries['privileges'] = urlencode((string)$headers->get('privileges'));
+        if ($headers->has(AppHelper::PRIVILEGES_REQUEST_PARAMETER)) {
+            $queries[AppHelper::PRIVILEGES_REQUEST_PARAMETER] = urlencode((string)$headers->get(AppHelper::PRIVILEGES_REQUEST_PARAMETER));
         }
 
         if ($headers->has(ShopRequest::SHOP_ID_REQUEST_PARAMETER)) {

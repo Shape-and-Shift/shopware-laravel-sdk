@@ -47,7 +47,8 @@ Your app is now ready to install by a Shopware application!
 ## Usage
 - Context, ShopRepository auto-binding
 - SwAppMiddleware _(alias: 'sas.app.auth')_: A middleware to verify incoming webhook requests
-- SwAppIframeMiddleware _(alias: 'sas.app.auth.iframe')_: A middleware to verify incoming requests from Iframe Shopware
+- SwAppIframeMiddleware _(alias: 'sas.app.auth.iframe:?app_name')_: A middleware to verify incoming requests from Iframe Shopware (`app_name` is the name of the App)
+- SwAppHeaderMiddleware _(alias: 'sas.app.auth.header')_: A middleware to verify incoming requests from Headers requests
 
 ## Change log
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.

@@ -2,10 +2,11 @@
 
 namespace Sas\ShopwareLaravelSdk\ServiceProvider;
 
+use Sas\ShopwareLaravelSdk\Utils\AppHelper;
 use Vin\ShopwareSdk\Data\Webhook\ShopRequest;
 use Sas\ShopwareLaravelSdk\Models\SwShop;
 use Illuminate\Contracts\Support\DeferrableProvider;
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Illuminate\Support\ServiceProvider;
 use Sas\ShopwareLaravelSdk\Repositories\ShopRepository;
@@ -36,6 +37,7 @@ class ContextServiceProvider extends ServiceProvider implements DeferrableProvid
 
             if ($request->headers->has(ShopRequest::SHOP_ID_REQUEST_PARAMETER)) {
                 $shopId = $request->headers->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
+                $appId = (string) $request->headers->get(AppHelper::APP_ID_REQUEST_PARAMETER);
             } else {
                 if ($request->getMethod() === 'POST') {
                     $requestContent = \json_decode($request->getContent(), true);
@@ -43,13 +45,15 @@ class ContextServiceProvider extends ServiceProvider implements DeferrableProvid
                 } else {
                     $shopId = $request->query->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
                 }
+
+                $appId = (string)$request->query->get(AppHelper::APP_ID_REQUEST_PARAMETER);
             }
 
             if (!$shopId) {
                 return null;
             }
 
-            return $shopRepository->getShopContext($shopId);
+            return $shopRepository->getShopContext($shopId, ['app_id' => $appId]);
         });
 
         $this->app->singleton(AppAction::class, function (Application $app) {
@@ -83,7 +87,7 @@ class ContextServiceProvider extends ServiceProvider implements DeferrableProvid
      *
      * @return array
      */
-    public function provides()
+    public function provides(): array
     {
         return [Context::class, AppAction::class, ShopRepository::class, Event::class, IFrameRequest::class];
     }
