@@ -1,3 +1,6 @@
+### 1.3.2
+- Add get middleware for Iframe
+
 ### 1.3.1
 - Add SwAppHeaderMiddleware to verify incoming headers requests from Shopware
 

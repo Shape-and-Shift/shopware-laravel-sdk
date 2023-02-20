@@ -2,8 +2,8 @@
 
 namespace Sas\ShopwareLaravelSdk\Repositories;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 use Sas\ShopwareLaravelSdk\Models\SwShop;
 use Vin\ShopwareSdk\Client\AdminAuthenticator;
 use Vin\ShopwareSdk\Client\GrantType\ClientCredentialsGrantType;
@@ -27,7 +27,7 @@ class ShopRepository
         $shop = $this->getShopById($shopId);
 
         if (!$shop) {
-            throw new \Exception('Shop not found');
+            throw new Exception('Shop not found');
         }
 
         $shop->update([
@@ -47,14 +47,17 @@ class ShopRepository
         ]);
     }
 
-    public function getShopById(string $shopId): ?SwShop
+    public function getShopById(?string $shopId): ?SwShop
     {
+        if (!$shopId) {
+            return null;
+        }
+
         if (array_key_exists($shopId, $this->shops)) {
             return $this->shops[$shopId];
         }
 
         $shop = $this->shopModel->find($shopId);
-
         if (!$shop) {
             return null;
         }
@@ -76,7 +79,7 @@ class ShopRepository
         $shop = $this->getShopById($shopId);
 
         if (!$shop) {
-            throw new \Exception('Shop not found');
+            throw new Exception('Shop not found');
         }
 
         return $shop->shop_secret;
@@ -85,14 +88,12 @@ class ShopRepository
     public function getShopContext(string $shopId): Context
     {
         $shop = $this->getShopById($shopId);
-
         if (!$shop) {
-            throw new \Exception('Shop not found');
+            throw new Exception('Shop not found');
         }
 
         $token = $shop->access_token;
-
-        if (!$token || !$token instanceof AccessToken || $token->isExpired()) {
+        if (!$token instanceof AccessToken || $token->isExpired()) {
             $grantType = new ClientCredentialsGrantType($shop->api_key, $shop->secret_key);
             $authenticator = new AdminAuthenticator($grantType, $shop->shop_url);
 
