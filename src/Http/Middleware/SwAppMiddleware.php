@@ -13,6 +13,8 @@ use Vin\ShopwareSdk\Service\WebhookAuthenticator;
 
 class SwAppMiddleware
 {
+    protected ?string $appName = null;
+
     public const REQUIRED_KEYS = [
         ShopRequest::SHOP_ID_REQUEST_PARAMETER,
         ShopRequest::SHOP_URL_REQUEST_PARAMETER,
@@ -33,12 +35,13 @@ class SwAppMiddleware
      *
      * @param Request $request
      * @param Closure $next
-     * @param string|null ...$guards
+     * @param ?string $appName
      * @return mixed
      * @throws AuthorizationFailedException
      */
-    public function handle(Request $request, Closure $next, ...$guards)
+    public function handle(Request $request, Closure $next, ?string $appName)
     {
+        $this->appName = $appName;
         $shop = null;
 
         if ($request->getMethod() === 'POST' && $this->supportsPostRequest($request)) {

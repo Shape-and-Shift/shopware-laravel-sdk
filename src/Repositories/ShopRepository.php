@@ -4,6 +4,7 @@ namespace Sas\ShopwareLaravelSdk\Repositories;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Ramsey\Uuid\Uuid;
 use Sas\ShopwareLaravelSdk\Models\SwShop;
 use Vin\ShopwareSdk\Client\AdminAuthenticator;
 use Vin\ShopwareSdk\Client\GrantType\ClientCredentialsGrantType;
@@ -36,18 +37,24 @@ class ShopRepository
         ]);
     }
 
-    public function createShop(Shop $shop): void
+    public function createShop(Shop $shop, array $condition = [], array $update = []): void
     {
-        $this->shopModel->updateOrCreate(['shop_id' => $shop->getShopId()], [
-            'shop_url' => $shop->getShopUrl(),
-            'shop_secret' => $shop->getShopSecret(),
-            'access_token' => null,
-            'api_key' => null,
-            'secret_key' => null
-        ]);
+        $this->shopModel->updateOrCreate(
+            array_merge([
+                'shop_id' => $shop->getShopId()
+            ], $condition),
+            array_merge([
+                'app_id' => Uuid::uuid4()->toString(),
+                'shop_url' => $shop->getShopUrl(),
+                'shop_secret' => $shop->getShopSecret(),
+                'access_token' => null,
+                'api_key' => null,
+                'secret_key' => null
+            ], $update)
+        );
     }
 
-    public function getShopById(?string $shopId): ?SwShop
+    public function getShopById(?string $shopId, array $queries = []): ?SwShop
     {
         if (!$shopId) {
             return null;
@@ -57,7 +64,16 @@ class ShopRepository
             return $this->shops[$shopId];
         }
 
-        $shop = $this->shopModel->find($shopId);
+        $query = $this->shopModel->where('shop_id', $shopId);
+        foreach ($queries as $column => $value) {
+            if (empty($value) || empty($column)) {
+                continue;
+            }
+
+            $query = $query->where($column, $value);
+        }
+
+        $shop = $query->first();
         if (!$shop) {
             return null;
         }
@@ -65,18 +81,18 @@ class ShopRepository
         return $this->shops[$shopId] = $shop;
     }
 
-    public function removeShop(string $shopId): void
+    public function removeShop(string $shopId, array $queries = []): void
     {
-        $shop = $this->getShopById($shopId);
+        $shop = $this->getShopById($shopId, $queries);
 
         $shop->delete();
 
         unset($this->shops[$shopId]);
     }
 
-    public function getSecretByShopId(string $shopId): string
+    public function getSecretByShopId(string $shopId, array $queries = []): string
     {
-        $shop = $this->getShopById($shopId);
+        $shop = $this->getShopById($shopId, $queries);
 
         if (!$shop) {
             throw new Exception('Shop not found');
@@ -85,9 +101,9 @@ class ShopRepository
         return $shop->shop_secret;
     }
 
-    public function getShopContext(string $shopId): Context
+    public function getShopContext(string $shopId, array $queries = []): Context
     {
-        $shop = $this->getShopById($shopId);
+        $shop = $this->getShopById($shopId, $queries);
         if (!$shop) {
             throw new Exception('Shop not found');
         }

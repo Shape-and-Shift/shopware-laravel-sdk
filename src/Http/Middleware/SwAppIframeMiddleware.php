@@ -4,6 +4,7 @@ namespace Sas\ShopwareLaravelSdk\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Sas\ShopwareLaravelSdk\Models\SwShop;
+use Sas\ShopwareLaravelSdk\Utils\AppHelper;
 use Symfony\Component\HttpFoundation\InputBag;
 use Vin\ShopwareSdk\Data\Webhook\ShopRequest;
 use Vin\ShopwareSdk\Exception\AuthorizationFailedException;
@@ -18,10 +19,24 @@ class SwAppIframeMiddleware extends SwAppMiddleware
         $sourceRequest = $requestContent['source'];
         $shopId = $sourceRequest[ShopRequest::SHOP_ID_REQUEST_PARAMETER];
 
-        $shop = $this->shopRepository->getShopById($shopId);
+        $shop = $this->shopRepository->getShopById($shopId, ['app_name' => $this->appName]);
 
         $authenticated = $shop && $this->checkPostRequest($sourceRequest, $shop->shop_secret);
+        if (!$authenticated) {
+            throw new AuthorizationFailedException($request->getMethod() . ' is not supported or the data is invalid');
+        }
 
+        return $shop;
+    }
+
+    protected function authenticateGetRequest(Request $request): SwShop
+    {
+        $queries = $request->query;
+        $shopId = (string)$queries->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
+
+        $shop = $this->shopRepository->getShopById($shopId, ['app_name' => $this->appName]);
+
+        $authenticated = $shop && $this->checkGetRequests($queries, $shop);
         if (!$authenticated) {
             throw new AuthorizationFailedException($request->getMethod() . ' is not supported or the data is invalid');
         }
@@ -50,32 +65,16 @@ class SwAppIframeMiddleware extends SwAppMiddleware
         return hash_equals($hmac, $shopwareShopSignature);
     }
 
-    protected function authenticateGetRequest(Request $request): SwShop
-    {
-        $queries = $request->query;
-        $shopId = (string)$queries->get(ShopRequest::SHOP_ID_REQUEST_PARAMETER);
-
-        $shop = $this->shopRepository->getShopById($shopId);
-
-        $authenticated = $shop && $this->checkGetRequests($queries, $shop);
-
-        if (!$authenticated) {
-            throw new AuthorizationFailedException($request->getMethod() . ' is not supported or the data is invalid');
-        }
-
-        return $shop;
-    }
-
     protected function checkGetRequests(InputBag $inputBag, SwShop $shop): bool
     {
         $queries = [];
 
-        if ($inputBag->has('location-id')) {
-            $queries['location-id'] = $inputBag->get('location-id');
+        if ($inputBag->has(AppHelper::LOCATION_ID_REQUEST_PARAMETER)) {
+            $queries[AppHelper::LOCATION_ID_REQUEST_PARAMETER] = $inputBag->get(AppHelper::LOCATION_ID_REQUEST_PARAMETER);
         }
 
-        if ($inputBag->has('privileges')) {
-            $queries['privileges'] = urlencode((string)$inputBag->get('privileges'));
+        if ($inputBag->has(AppHelper::PRIVILEGES_REQUEST_PARAMETER)) {
+            $queries[AppHelper::PRIVILEGES_REQUEST_PARAMETER] = urlencode((string)$inputBag->get(AppHelper::PRIVILEGES_REQUEST_PARAMETER));
         }
 
         if ($inputBag->has(ShopRequest::SHOP_ID_REQUEST_PARAMETER)) {

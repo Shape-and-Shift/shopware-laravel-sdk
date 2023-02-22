@@ -1,3 +1,8 @@
+### 2.0.0
+- Drop primary key from `shop_id` of `sw_shop`
+- Add `app_id` as primary in `sw_shop`
+- Change behavior of middleware (using `app_name` and `app_id`)
+
 ### 1.3.2
 - Add get middleware for Iframe
 

@@ -11,6 +11,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 class AppHelper
 {
+    const PRIVILEGES_REQUEST_PARAMETER = 'privileges';
+    const LOCATION_ID_REQUEST_PARAMETER = 'location-id';
+    const APP_ID_REQUEST_PARAMETER = 'app-id';
+
     private Request $request;
 
     public function __construct(Request $request)

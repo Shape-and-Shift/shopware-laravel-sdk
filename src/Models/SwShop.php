@@ -8,8 +8,10 @@ use Illuminate\Auth\Authenticatable;
 use Vin\ShopwareSdk\Data\AccessToken;
 
 /**
+ * @property string $app_id
  * @property string $shop_id
  * @property string $shop_url
+ * @property string $shop_name
  * @property string $shop_secret
  * @property string $api_key
  * @property string $secret_key
@@ -28,7 +30,7 @@ class SwShop extends Model implements AuthenticatableContract
      */
     protected $table = 'sw_shops';
 
-    protected $primaryKey = 'shop_id';
+    protected $primaryKey = 'app_id';
 
     protected $keyType = 'string';
 
